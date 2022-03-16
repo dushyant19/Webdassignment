@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const Task = require('../models/task')
 
 router.get('/', (req, res, next) => {
 	return res.render('index.ejs');
@@ -79,10 +80,38 @@ router.get('/profile', (req, res, next) => {
 		if (!data) {
 			res.redirect('/');
 		} else {
-			return res.render('data.ejs', { "name": data.username, "email": data.email });
+			console.log("data is ",data);
+			// Here I can find all the tasks associated with a user
+			const tasks = Task.find({
+				creater: data._id
+			})
+			return res.render('data.ejs', { "name": data.username, "email": data.email , "tasks": tasks});
 		}
 	});
 });
+
+router.get('/create_task',(req,res,next) => {
+	User.findOne({ unique_id: req.session.userId }, (err, data) => {
+		if (!data) {
+			res.redirect('/');
+		} else {
+			return res.render('create_task.ejs', { "name": data.username, "email": data.email });
+		}
+	});
+})
+
+router.post('/create_task',(req,res,next) => {
+	User.findOne({ unique_id: req.session.userId }, (err, data) => {
+		if (!data) {
+			res.redirect('/');
+		} else {
+			console.log("body is")
+			console.log(req.body)
+			res.redirect('/profile')
+			// On profile we can show a list of created tasks and list of shared tasks ans list of accepted tasks
+		}
+	});
+})
 
 router.get('/logout', (req, res, next) => {
 	if (req.session) {
